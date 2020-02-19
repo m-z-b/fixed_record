@@ -2,7 +2,7 @@
 require 'yaml'
 
 class FixedRecord
-  VERSION = "0.1.0"
+  VERSION = "0.1.1"
 
   # Lazy load data from given filename 
   # creating accessors for top level attributes
