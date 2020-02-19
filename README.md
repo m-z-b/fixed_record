@@ -4,13 +4,11 @@ FixedRecord provides ActiveRecord-like read-only access to a set of records
 described in a YAML file.
 
 Why is this useful? Occasionally you have tabular data which hardly ever
-changes and can easily be edited by hand. Although this code could be placed in a database, it's not worth the overheads (loading a database, maintaining database code). 
+changes and can easily be edited by hand. Although this data could be placed in a database, it may not be worth the overheads involved (loading a database, maintaining database code). 
 
-It's quicker and simpler to implement this as an array of objects in a YAML file. 
+It may be quicker and simpler to implement this as an array of objects in a YAML file, and use this gem to provide access to the data. 
 
-See the Usage section below
-
-
+See the Usage section below.
 
 ## Installation
 
@@ -68,15 +66,17 @@ end
 Or can be accessed as an array:
 
 ```ruby
-MyFavoriteWebiste.all
+MyFavoriteWebsite.all
 ```
 A count of the number of records is available:
 
 ```ruby
-puts MyFavoriteWebiste.count
+puts MyFavoriteWebsite.count
 ```
 
-The class also includes the `Enumerable` module.
+The declared class will also include all the methods from the `Enumerable` module.
+
+## Error Checking
 
 Some basic sanity checks are performed on the YAML file to catch common errors:
 
@@ -89,9 +89,6 @@ Additional validations can be performed by overriding the `validate_yaml` and
 `validate_item` class functions. 
 
 
-
-
-
 ## Development
 
 After checking out the repo, run `bin/setup` to install dependencies. Then, run `rspec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
@@ -100,4 +97,4 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/fixed_record.
+Bug reports and pull requests are welcome on GitHub at https://github.com/m-z-b/fixed_record.
