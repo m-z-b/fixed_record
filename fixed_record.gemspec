@@ -10,13 +10,13 @@ Gem::Specification.new do |spec|
 
   spec.summary       = %q{Provide ActiveRecord like read-only access to a small dataset stored in a YAML file}
   #spec.description   = %q{TODO: Write a longer description or delete this line.}
-  spec.homepage      = "https://github.com/m-z-b/fixed_record"
+  spec.homepage      = "https://github.com/m-z-b/fixed_record/README.md"
   spec.license       = "MIT"
 
   #spec.metadata["allowed_push_host"] = "TODO: Set to 'http://mygemserver.com'"
 
   spec.metadata["homepage_uri"] = spec.homepage
-  spec.metadata["source_code_uri"] = "https://github.com/m-z-b/strangler/fixed_record.git"
+  spec.metadata["source_code_uri"] = "https://github.com/m-z-b/fixed_record"
   #spec.metadata["changelog_uri"] = "TODO: Put your gem's CHANGELOG.md URL here."
 
   # Specify which files should be added to the gem when it is released.
