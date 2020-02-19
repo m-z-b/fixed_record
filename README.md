@@ -43,7 +43,7 @@ Create a YAML file defining an array of records like this:
 Then to load these, create a class
 
 ```ruby
-require 'FixedRecord'
+require 'fixed_record'
 
 class MyFavoriteWebsite < FixedRecord
     data "#{Rails.root}/data/my_favorite_websites.yml"
