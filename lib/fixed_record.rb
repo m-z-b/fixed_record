@@ -27,6 +27,10 @@ class FixedRecord
         all.each(&block)
       end
 
+      def self.count
+        all.count
+      end
+
       def self.load!
         if @@items.nil?
           y = YAML.load_file( filename )
