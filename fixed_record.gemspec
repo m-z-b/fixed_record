@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
 
   spec.summary       = %q{Provide ActiveRecord like read-only access to a small dataset stored in a YAML file}
   #spec.description   = %q{TODO: Write a longer description or delete this line.}
-  spec.homepage      = "https://github.com/m-z-b/fixed_record/README.md"
+  spec.homepage      = "https://github.com/m-z-b/fixed_record/blob/master/README.md"
   spec.license       = "MIT"
 
   #spec.metadata["allowed_push_host"] = "TODO: Set to 'http://mygemserver.com'"
