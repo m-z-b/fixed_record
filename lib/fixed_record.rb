@@ -37,6 +37,14 @@ class FixedRecord
         else
           nil
         end
+      end
+
+      def self.has_key?( k )
+        if all.is_a?(Hash)
+          all.has_key?( k )
+        else
+          false
+        end
       end 
 
       def self.load!
@@ -54,15 +62,19 @@ class FixedRecord
             end
           elsif y.is_a?(Hash)
             @@items = Hash.new
+            add_key = true
             y.each do |k,values|
-              valid_keys = values.keys if valid_keys.nil?
+              if valid_keys.nil?
+                valid_keys = values.keys
+                add_key = !values.has_key?('key')
+              end
               validate_item( valid_keys, values, k )
-              values['key'] = k unless values.has_key?('key')
+              values['key'] = k if add_key
               r = new
               r.instance_variable_set( :@values, values )
               @@items[k] = r   
             end
-            valid_keys << 'key' unless valid_keys.include?('key')
+            valid_keys << 'key' if add_key
           end
           create_methods( valid_keys )
         end
@@ -70,7 +82,7 @@ class FixedRecord
     }
   end
 
-
+  # Create access methods for each of valid_keys
   def self.create_methods( valid_keys )
     valid_keys.each do |k|
       define_method( k.to_sym) { @values[k] }

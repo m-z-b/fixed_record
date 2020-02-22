@@ -70,6 +70,20 @@ RSpec.describe FixedRecord do
 
       it "implements each" do
         expect(HappyPathArray).to respond_to :each
+        count = 0
+        HappyPathArray.each do |r|
+          count = count + 1
+        end
+        expect(count).to eq 2
+      end
+
+      it "indexing operator returns nil" do
+        expect(HappyPathArray['anything']).to be nil
+        expect(HappyPathArray['key']).to be nil
+      end
+
+      it "has_key? returns false" do
+        expect(HappyPathArray.has_key?('anything')).to be false
       end
 
       it "returns the correct data for the first record" do
@@ -120,6 +134,14 @@ RSpec.describe FixedRecord do
         end
         expect(count).to eq 2
       end
+
+      it "implements has_key? correctly" do
+        expect(HappyPathHash.has_key?('StaticPage#first')).to be true
+        expect(HappyPathHash.has_key?('StaticPage#last')).to be true
+        expect(HappyPathHash.has_key?('missing')).to be false
+      end
+
+
 
       it 'returns the correct data for StaticPage#first' do
         expect(HappyPathHash['StaticPage#first'].title).to eq 'First Page'
