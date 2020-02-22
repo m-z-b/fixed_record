@@ -2,7 +2,7 @@
 require 'yaml'
 
 class FixedRecord
-  VERSION = "0.1.2"
+  VERSION = "0.2.0"
 
   # Lazy load data from given filename 
   # creating accessors for top level attributes
@@ -28,43 +28,84 @@ class FixedRecord
       end
 
       def self.count
-        all.count
+        all.length
       end
+
+      def self.[]( k )
+        if all.is_a?(Hash)
+          all[k]
+        else
+          nil
+        end
+      end 
 
       def self.load!
         if @@items.nil?
           y = YAML.load_file( filename )
           validate_yaml( y )
-          valid_keys = y.first.keys
-          valid_keys.each do |k|
-            define_method( k.to_sym) { @values[k] }
+          valid_keys = nil
+          if y.is_a?(Array)
+            valid_keys = y.first.keys
+            @@items = y.map.with_index do |values,i|
+              validate_item( valid_keys, values, i )
+              r = new
+              r.instance_variable_set( :@values, values )
+              r
+            end
+          elsif y.is_a?(Hash)
+            @@items = Hash.new
+            y.each do |k,values|
+              valid_keys = values.keys if valid_keys.nil?
+              validate_item( valid_keys, values, k )
+              values['key'] = k unless values.has_key?('key')
+              r = new
+              r.instance_variable_set( :@values, values )
+              @@items[k] = r   
+            end
+            valid_keys << 'key' unless valid_keys.include?('key')
           end
-
-          @@items = y.map.with_index do |values,i|
-            validate_item( valid_keys, values, i )
-            r = new
-            r.instance_variable_set( :@values, values )
-            r
-          end
+          create_methods( valid_keys )
         end
       end
     }
   end
 
-  # Validate the top level of the data structure returned 
-  def self.validate_yaml( y )
-    unless y.is_a?(Array) && y.length > 0
-      throw ArgumentError.new "#{filename} does not contain an array of items"
+
+  def self.create_methods( valid_keys )
+    valid_keys.each do |k|
+      define_method( k.to_sym) { @values[k] }
     end
   end
 
-  # Validate a hash of name -> value
-  def self.validate_item( keys, hash, index )
-    raise ArgumentError, "#{filename} item #{index+1} should be name value pairs" unless hash.is_a?(Hash)
-    raise ArgumentError, "#{filename} item #{index+1} has wrong number of values" if keys.count != hash.count
-    keys.each do |name|
-      unless hash.has_key? name
-        raise ArgumentError, "#{filename} item #{index+1}  is missing value for '#{name}'" 
+  # Validate the top level of the data structure returned 
+  def self.validate_yaml( y )
+    if y.is_a?(Array)
+      if y.length <= 0
+        throw ArgumentError.new "#{filename} contain a zero length array"
+      end
+      if y.any?{ |i| !i.is_a?(Hash)}
+        throw ArgumentError.new "#{filename} does not contain an array of items (hashes)"
+      end
+    elsif y.is_a?(Hash)
+      if y.count <= 0
+         throw ArgumentError.new "#{filename} contain an empty hash"
+      end
+      if y.any?{ |k,v| !v.is_a?(Hash) }
+        throw ArgumentError.new "#{filename} does not contain an array of items (hashes)"
+      end
+    else
+      throw ArgumentError.new "#{filename} does not contain a hash of items or an array of items"
+    end
+
+  end
+
+  # Validate a values of name -> value
+  def self.validate_item( valid_keys, values, index )
+    raise ArgumentError, "#{filename} item #{index} should be name value pairs" unless values.is_a?(Hash)
+    raise ArgumentError, "#{filename} item #{index} has wrong number of values" if valid_keys.length != values.length
+    valid_keys.each do |name|
+      unless values.has_key? name
+        raise ArgumentError, "#{filename} item #{index}  is missing value for '#{name}'" 
       end
     end
   end

@@ -1,0 +1,10 @@
+StaticPage#first:
+  title: First Page
+  description: Welcome to the First Page
+
+StaticPage#last:
+  name: Last Page 
+  description: Welcome to the Last Page
+  author: Anne Onn
+ 
+  

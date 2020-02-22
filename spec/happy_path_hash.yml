@@ -1,0 +1,9 @@
+StaticPage#first:
+  title: First Page
+  description: Welcome to the First Page
+
+StaticPage#last:
+  title: Last Page 
+  description: Welcome to the Last Page
+
+  
