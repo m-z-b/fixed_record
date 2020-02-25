@@ -48,7 +48,7 @@ Then to load these, create a class
 require 'fixed_record'
 
 class MyFavoriteWebsite < FixedRecord
-    data "#{Rails.root}/data/my_favorite_websites.yml"
+    data "#{Rails.root}/data/my_favorite_websites.yml", required: [:name, :url]
 
   # Return hostname of url for company
   def hostname
@@ -88,7 +88,8 @@ StaticPage#first:
   description: Welcome to the First Page
 
 StaticPage#last:
-  title: Last Page 
+  title: Last Page
+  short_title: LastP 
   description: Welcome to the Last Page
 
 ```
@@ -99,7 +100,7 @@ Then to load these, create a class
 require 'fixed_record'
 
 class MyWebPages < FixedRecord
-    data "#{Rails.root}/data/my_web_pages.yml"
+    data "#{Rails.root}/data/my_web_pages.yml", required: [:title,:description], optional: [:short_title]
 
 end
 ```
@@ -140,12 +141,35 @@ The declared class will also include all the methods from the `Enumerable` modul
 Some basic sanity checks are performed on the YAML file to catch common errors:
 
 * It must define a non-empty array or hash of records
-* All records must have the same set of attributes
+* If the optional `required:` or `optional:` arguments are given, then each record _must_ have all the required fields and _may_ also have any of the optional fields. 
+* If niether the `required:` or `optional:` arguments are given, then each record _must_ have the same set of fields.
 
-An `ArgumentError` exception will be thrown if any errors are detected.
+An `ArgumentError` exception will be thrown if any validation errors are detected. A system-dependent error (probably `Errno::ENOENT`) will be thrown if the file cannot be read. 
 
-Additional validations can be performed by overriding the `validate_yaml` and
-`validate_item` class functions. 
+Additional validations can be performed by defining a `validate` method. e.g.
+
+```ruby
+require 'fixed_record'
+require 'uri'
+
+class MyFavoriteWebsite < FixedRecord
+    data "#{Rails.root}/data/my_favorite_websites.yml", required: [:name, :url]
+
+  # Check that the url can be parsed
+  def validate( values, index )
+    begin
+      URI.parse(url)
+    rescue URI::InvalidURIError -> e
+      raise e.class, "#{filename} index #{index} has invalid url: #{e.message}"
+    end
+  end
+
+end
+```
+
+
+
+
 
 
 ## Development

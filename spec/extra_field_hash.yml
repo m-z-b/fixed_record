@@ -3,7 +3,7 @@ StaticPage#first:
   description: Welcome to the First Page
 
 StaticPage#last:
-  name: Last Page 
+  title: Last Page 
   description: Welcome to the Last Page
   author: Anne Onn
  

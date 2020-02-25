@@ -3,5 +3,5 @@ StaticPage#first:
   description: Welcome to the First Page
 
 StaticPage#last:
-  name: Last Page 
+  title: Last Page 
   

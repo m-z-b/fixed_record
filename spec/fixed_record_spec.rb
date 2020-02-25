@@ -10,6 +10,15 @@ class MissingFieldArray < FixedRecord
   data File.join( __dir__, "missing_field_array.yml")
 end
 
+class MissingFieldArrayRequired < FixedRecord
+  data File.join( __dir__, "missing_field_array.yml"), required: [ :name, :url ]
+end
+
+class MissingFieldHashRequired < FixedRecord
+  data File.join( __dir__, "missing_field_array.yml"), required: [ :title, :description ]
+end
+
+
 class ExtraFieldArray < FixedRecord
   data File.join( __dir__, "extra_field_array.yml")
 end
@@ -25,6 +34,31 @@ end
 class ExtraFieldHash < FixedRecord
   data File.join( __dir__, "extra_field_hash.yml")
 end
+
+class HappyPathArrayRequired < FixedRecord
+  data File.join( __dir__, "happy_path_array.yml"), required: [ :name, :url ]
+end
+
+class HappyPathArrayRequiredOptional < FixedRecord
+  data File.join( __dir__, "happy_path_array.yml"), required: [ :url ], optional: [ :name ]
+end
+
+class HappyPathArrayRequiredOptional1 < FixedRecord
+  data File.join( __dir__, "extra_field_array.yml"), required: [ :url, :name ], optional: [ :country ]
+end
+
+class HappyPathHashRequired < FixedRecord
+  data File.join( __dir__, "happy_path_hash.yml"), required: [ :title, :description ]
+end
+
+class HappyPathHashRequiredOptional < FixedRecord
+  data File.join( __dir__, "happy_path_hash.yml"), required: [ :title ], optional: [ :description ]
+end
+
+class HappyPathHashRequiredOptional1 < FixedRecord
+  data File.join( __dir__, "extra_field_hash.yml"), required: [ :title, :description ], optional: [ :author ]
+end
+
 
 
 # Either Type
@@ -97,6 +131,25 @@ RSpec.describe FixedRecord do
         expect(HappyPathArray.all[1].url).to eq "https://www.bbc.co.uk/"
       end
 
+      it "loads the data with required fields" do
+        expect(HappyPathArrayRequired.count).to eq 2
+        expect(HappyPathArrayRequired.first.name).to eq "Albion Research Ltd."
+        expect(HappyPathArrayRequired.first.url).to eq "https://www.albionresearch.com/"
+      end
+
+      it "loads the data with required and optional fields" do
+        expect(HappyPathArrayRequiredOptional.count).to eq 2
+        expect(HappyPathArrayRequiredOptional.first.name).to eq "Albion Research Ltd."
+        expect(HappyPathArrayRequiredOptional.first.url).to eq "https://www.albionresearch.com/"
+      end
+
+      it "loads the data with optional field" do
+        expect(HappyPathArrayRequiredOptional1.count).to eq 2
+        expect(HappyPathArrayRequiredOptional1.first.name).to eq "Albion Research Ltd."
+        expect(HappyPathArrayRequiredOptional1.first.url).to eq "https://www.albionresearch.com/"
+        expect(HappyPathArrayRequiredOptional1.first.country).to be nil
+      end
+
     end
 
     context "on a Sad Path" do
@@ -106,6 +159,13 @@ RSpec.describe FixedRecord do
           MissingFieldArray.all
         }.to raise_error(ArgumentError)
       end
+
+      it "raises an ArgumentError exception if a record has a missing required field" do
+        expect {
+          MissingFieldArrayRequired.all
+        }.to raise_error(ArgumentError)
+      end
+
 
       it "raises an ArgumentError exception if a record has an extra field" do
         expect {
@@ -159,6 +219,40 @@ RSpec.describe FixedRecord do
         expect(HappyPathHash['StaticPage#missing']).to be nil
       end
 
+      it "loads the data with required fields" do
+        expect(HappyPathHashRequired.count).to eq 2
+        expect(HappyPathHashRequired['StaticPage#first'].title).to eq 'First Page'
+        expect(HappyPathHashRequired['StaticPage#first'].description).to eq 'Welcome to the First Page'
+        expect(HappyPathHashRequired['StaticPage#first'].key).to eq 'StaticPage#first'
+        expect(HappyPathHashRequired['StaticPage#last'].title).to eq 'Last Page'
+        expect(HappyPathHashRequired['StaticPage#last'].description).to eq 'Welcome to the Last Page'
+        expect(HappyPathHashRequired['StaticPage#last'].key).to eq 'StaticPage#last'
+      end
+
+      it "loads the data with required and optional fields" do
+        expect(HappyPathHashRequiredOptional.count).to eq 2
+        expect(HappyPathHashRequiredOptional['StaticPage#first'].title).to eq 'First Page'
+        expect(HappyPathHashRequiredOptional['StaticPage#first'].description).to eq 'Welcome to the First Page'
+        expect(HappyPathHashRequiredOptional['StaticPage#first'].key).to eq 'StaticPage#first'
+        expect(HappyPathHashRequiredOptional['StaticPage#last'].title).to eq 'Last Page'
+        expect(HappyPathHashRequiredOptional['StaticPage#last'].description).to eq 'Welcome to the Last Page'
+        expect(HappyPathHashRequiredOptional['StaticPage#last'].key).to eq 'StaticPage#last'
+      end
+
+      it "loads the data with optional field" do
+        expect(HappyPathHashRequiredOptional1.count).to eq 2
+        expect(HappyPathHashRequiredOptional1['StaticPage#first'].title).to eq 'First Page'
+        expect(HappyPathHashRequiredOptional1['StaticPage#first'].description).to eq 'Welcome to the First Page'
+        expect(HappyPathHashRequiredOptional1['StaticPage#first'].key).to eq 'StaticPage#first'
+        expect(HappyPathHashRequiredOptional1['StaticPage#first'].author).to be nil
+        expect(HappyPathHashRequiredOptional1['StaticPage#last'].title).to eq 'Last Page'
+        expect(HappyPathHashRequiredOptional1['StaticPage#last'].description).to eq 'Welcome to the Last Page'
+        expect(HappyPathHashRequiredOptional1['StaticPage#last'].key).to eq 'StaticPage#last'
+        expect(HappyPathHashRequiredOptional1['StaticPage#last'].author).to eq 'Anne Onn'
+      end
+
+
+
     end
 
     context "on a Sad Path" do
@@ -168,6 +262,13 @@ RSpec.describe FixedRecord do
           MissingFieldHash.all
         }.to raise_error(ArgumentError)
       end
+
+      it "raises an ArgumentError exception if a record has a missing required field" do
+        expect {
+          MissingFieldHashRequired.all
+        }.to raise_error(ArgumentError)
+      end
+
 
       it "raises an ArgumentError exception if a record has an extra field" do
         expect {
