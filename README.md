@@ -134,6 +134,37 @@ puts MyWebPages.count
 
 The declared class will also include all the methods from the `Enumerable` module.
 
+### Singleton Record
+
+Create a YAML file `site_settingss.yml` defining a single records like this:
+
+```yaml
+
+sessionExpiry: 3600
+phone: +1.613.555.1212
+address: 500 Main Street, Anytown, Antartica
+
+```
+
+Then to load these, create a class
+
+```ruby
+require 'fixed_record'
+
+class SiteSettings < FixedRecord
+    data "#{Rails.root}/data/site_settings.yml", singleton: true
+
+end
+```
+
+The values can be accessed by index:
+
+```ruby
+SiteSettings['phone'] # '+1.613.555.1212'
+SiteSettings['address'] # '500 Main Street, Anytown, Antartica'
+SiteSettings[:phone] # This works too
+```
+The `required` and `optional` arguments can be used to check for inadvertent errors being introduced into the YAML file. An ArgumentError will be raised if the name is not defined in the file and is not declared as optional. 
 
 
 ## Error Checking

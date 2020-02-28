@@ -59,6 +59,22 @@ class HappyPathHashRequiredOptional1 < FixedRecord
   data File.join( __dir__, "extra_field_hash.yml"), required: [ :title, :description ], optional: [ :author ]
 end
 
+class HappySingleton < FixedRecord
+  data File.join( __dir__, 'singleton_data.yml' ), singleton: true
+end
+
+class HappySingletonRequired < FixedRecord
+  data File.join( __dir__, 'singleton_data.yml' ), singleton: true, required: [:name, :company]
+end
+
+class HappySingletonRequiredOptional < FixedRecord
+  data File.join( __dir__, 'singleton_data.yml' ), singleton: true, required: [:name], optional: [:company]
+end
+
+class SadSingletonMissingRequired < FixedRecord
+  data File.join( __dir__, 'singleton_data.yml' ), singleton: true, required: [:name, :company, :title]
+end
+
 
 
 # Either Type
@@ -281,5 +297,51 @@ RSpec.describe FixedRecord do
 
   end # Array
 
+
+  context "Singleton with default item names" do
+    it "returns the correct data" do
+      expect(HappySingleton['name']).to eq 'Mike Bell'
+      expect(HappySingleton['company']).to eq 'Albion Research Ltd.'
+    end
+
+    it "raises an ArgumentError if the attribute is not known" do
+      expect{HappySingleton['naem']}.to raise_error(ArgumentError)
+    end
+  end
+
+  context "Singleton with required item names" do
+    it "returns the correct data using strings" do
+      expect(HappySingletonRequired['name']).to eq 'Mike Bell'
+      expect(HappySingletonRequired['company']).to eq 'Albion Research Ltd.'
+    end
+
+    it "returns the correct data using symbols" do
+      expect(HappySingletonRequired[:name]).to eq 'Mike Bell'
+      expect(HappySingletonRequired[:company]).to eq 'Albion Research Ltd.'
+    end
+
+
+    it "raises an ArgumentError if the attribute is not known" do
+      expect{HappySingletonRequired['naem']}.to raise_error(ArgumentError)
+    end
+  end
+
+  context "Singleton with required and optional item names" do
+    it "returns the correct data" do
+      expect(HappySingletonRequiredOptional['name']).to eq 'Mike Bell'
+      expect(HappySingletonRequiredOptional['company']).to eq 'Albion Research Ltd.'
+    end
+
+    it "raises an ArgumentError if the attribute is not known" do
+      expect{HappySingletonRequiredOptional['naem']}.to raise_error(ArgumentError)
+    end
+  end
+
+  context "Sad Singelton" do
+        it "raises an ArgumentError if the attribute is not known" do
+      expect{SadSingletonMissingRequired['naem']}.to raise_error(ArgumentError)
+    end
+
+  end
 
 end
