@@ -1,5 +1,8 @@
 # Gem fixed_record Changelog
 
+## 0.4.1
+* Bump rake version due to security issue
+
 ## 0.4.0
 * Add support for a singleton record for general parameter access
 
