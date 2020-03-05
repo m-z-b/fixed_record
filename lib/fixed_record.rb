@@ -1,9 +1,10 @@
 
 require 'yaml'
+require 'psych'
 require 'set'
 
 class FixedRecord
-  VERSION = "0.4.1"
+  VERSION = "0.4.2"
 
   # Lazy load data from given filename 
   # creating accessors for top level attributes
@@ -79,7 +80,13 @@ class FixedRecord
 
       def self.load!
         if @@items.nil?
-          y = YAML.load_file( @@filename )
+          begin
+            y = YAML.load_file( @@filename )
+          rescue Errno::ENOENT
+            raise 
+          rescue Psych::SyntaxError => error
+            raise ArgumentError, "\#{error.class.name} \#{error.message}"
+          end
           validate_structure( y, @@singleton, @@filename )
           if @@valid_keys.empty? 
             # Grab keys from file

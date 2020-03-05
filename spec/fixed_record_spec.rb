@@ -87,6 +87,9 @@ class MissingData < FixedRecord
   data File.join( __dir__, "missing_file.yml") # Does not exist
 end
 
+class SyntaxErrorInData < FixedRecord
+  data File.join( __dir__, 'syntax_error.yml')
+end
 
 
 RSpec.describe FixedRecord do
@@ -108,6 +111,16 @@ RSpec.describe FixedRecord do
     }.to raise_error(ArgumentError)
   end
 
+  it "raises an ArgumentError with a suitable message if the YAML file cannot be parsed" do
+    begin
+      SyntaxErrorInData.all
+      raise "Did not report YAML syntax error in test file"
+    rescue ArgumentError => e
+      # With Psych and hopefully other parsers, the error message meaningful
+      expect(e.message).to match(/[Ss]yntax/)
+      expect(e.message).to include(SyntaxErrorInData.filename)
+    end
+  end
 
 
   context "with Array data" do

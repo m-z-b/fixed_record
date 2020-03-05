@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    fixed_record (0.4.1)
+    fixed_record (0.4.2)
 
 GEM
   remote: https://rubygems.org/

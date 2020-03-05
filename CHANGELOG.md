@@ -1,5 +1,8 @@
 # Gem fixed_record Changelog
 
+## 0.4.2
+* Syntax Errors in YAML file now reported as ArgumentError
+
 ## 0.4.1
 * Bump rake version due to security issue
 
