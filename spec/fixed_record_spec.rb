@@ -118,7 +118,7 @@ RSpec.describe FixedRecord do
     rescue ArgumentError => e
       # With Psych and hopefully other parsers, the error message meaningful
       expect(e.message).to match(/[Ss]yntax/)
-      expect(e.message).to include(SyntaxErrorInData.filename)
+      expect(e.message).to include(File.basename(SyntaxErrorInData.filename))
     end
   end
 

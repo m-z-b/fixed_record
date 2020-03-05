@@ -4,7 +4,7 @@ require 'psych'
 require 'set'
 
 class FixedRecord
-  VERSION = "0.4.2"
+  VERSION = "0.4.4"
 
   # Lazy load data from given filename 
   # creating accessors for top level attributes
@@ -85,7 +85,15 @@ class FixedRecord
           rescue Errno::ENOENT
             raise 
           rescue Psych::SyntaxError => error
-            raise ArgumentError, "\#{error.class.name} \#{error.message}"
+            fname = File.basename(@@filename)
+            msg = error.message
+            if msg.include? @@filename
+              msg.sub!( @@filename, fname )
+              msg = "\#{error.class.name} \#{msg}"
+            else
+              msg = "\#{error.class.name} \#{fname} \#{error.message}"
+            end
+            raise ArgumentError, msg
           end
           validate_structure( y, @@singleton, @@filename )
           if @@valid_keys.empty? 

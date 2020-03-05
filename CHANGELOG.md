@@ -1,6 +1,6 @@
 # Gem fixed_record Changelog
 
-## 0.4.2
+## 0.4.4
 * Syntax Errors in YAML file now reported as ArgumentError
 
 ## 0.4.1
