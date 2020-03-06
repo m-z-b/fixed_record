@@ -48,7 +48,7 @@ Then to load these, create a class
 require 'fixed_record'
 
 class MyFavoriteWebsite < FixedRecord
-    data "#{Rails.root}/data/my_favorite_websites.yml", required: [:name, :url]
+    data "#{Rails.root}/data/my_favorite_websites.yml", required: [:name, :url], optional: [:title]
 
   # Return hostname of url for company
   def hostname
@@ -75,6 +75,20 @@ A count of the number of records is available:
 ```ruby
 puts MyFavoriteWebsite.count
 ```
+
+As is the filename and the set of valid field names:
+```ruby
+puts MyFavoriteWebsite.filename # .../my_favorite_websites.yml
+puts MyFavoriteWebsite.valid_keys.include?( :name )  # true
+```
+## Value presence
+
+It's possible to check whether a value is supplied for an optional field for an item:
+
+```ruby
+puts MyFavoriteWebsite.all.first.present?(:title) # true
+```
+This makes it possible to distinguish between an optional value being omitted and explicitly being given the value nil.
 
 The declared class will also include all the methods from the `Enumerable` module.
 
@@ -136,7 +150,7 @@ The declared class will also include all the methods from the `Enumerable` modul
 
 ### Singleton Record
 
-Create a YAML file `site_settingss.yml` defining a single records like this:
+Create a YAML file `site_settings.yml` defining a single records like this:
 
 ```yaml
 

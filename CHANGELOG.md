@@ -1,5 +1,10 @@
 # Gem fixed_record Changelog
 
+## 0.5.0
+* Added class method `valid_names` to return valid names in records
+* Documented class method `filename`
+* Add instance method `present?` to test if a value was supplied for an  optional field
+
 ## 0.4.4
 * Syntax Errors in YAML file now reported as ArgumentError
 

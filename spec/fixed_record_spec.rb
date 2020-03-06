@@ -140,13 +140,23 @@ RSpec.describe FixedRecord do
         expect(count).to eq 2
       end
 
+      it "implements filename" do
+        expect(HappyPathArray).to respond_to :filename
+      end
+
+
+      it "implements valid_names" do
+        expect(HappyPathArray).to respond_to :valid_names
+        expect(HappyPathArray.valid_names).to contain_exactly( 'url', 'name')
+      end
+
       it "indexing operator returns nil" do
         expect(HappyPathArray['anything']).to be nil
         expect(HappyPathArray['key']).to be nil
       end
 
-      it "has_key? returns false" do
-        expect(HappyPathArray.has_key?('anything')).to be false
+      it "has_item_key? returns false" do
+        expect(HappyPathArray.has_item_key?('anything')).to be false
       end
 
       it "returns the correct data for the first record" do
@@ -177,6 +187,8 @@ RSpec.describe FixedRecord do
         expect(HappyPathArrayRequiredOptional1.first.name).to eq "Albion Research Ltd."
         expect(HappyPathArrayRequiredOptional1.first.url).to eq "https://www.albionresearch.com/"
         expect(HappyPathArrayRequiredOptional1.first.country).to be nil
+        expect(HappyPathArrayRequiredOptional1.first.present?(:url)).to be true
+        expect(HappyPathArrayRequiredOptional1.first.present?(:country)).to be false
       end
 
     end
@@ -224,10 +236,10 @@ RSpec.describe FixedRecord do
         expect(count).to eq 2
       end
 
-      it "implements has_key? correctly" do
-        expect(HappyPathHash.has_key?('StaticPage#first')).to be true
-        expect(HappyPathHash.has_key?('StaticPage#last')).to be true
-        expect(HappyPathHash.has_key?('missing')).to be false
+      it "implements has_item_key? correctly" do
+        expect(HappyPathHash.has_item_key?('StaticPage#first')).to be true
+        expect(HappyPathHash.has_item_key?('StaticPage#last')).to be true
+        expect(HappyPathHash.has_item_key?('missing')).to be false
       end
 
 

@@ -4,7 +4,7 @@ require 'psych'
 require 'set'
 
 class FixedRecord
-  VERSION = "0.4.4"
+  VERSION = "0.5.0"
 
   # Lazy load data from given filename 
   # creating accessors for top level attributes
@@ -61,7 +61,7 @@ class FixedRecord
           end
         end
 
-        def self.has_key?( k )
+        def self.has_item_key?( k )
           if all.is_a?(Hash)
             all.has_key?( k )
           else
@@ -77,6 +77,10 @@ class FixedRecord
         @@filename
       end
 
+      def self.valid_names
+        load!
+        @@valid_keys
+      end
 
       def self.load!
         if @@items.nil?
@@ -150,7 +154,15 @@ private
     valid_keys.each do |key|
       define_method( key.to_sym) { @values[key] }
     end
+    # Test if a value is defined (could be nil) for a name
+    class_eval %Q{
+        def present?(name)
+          @values.key?( name.to_s )
+        end
+      }
   end
+
+
 
   # Validate the top level of the data structure returned 
   # Validate the top level of the data structure returned 
