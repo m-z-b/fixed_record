@@ -97,6 +97,14 @@ RSpec.describe FixedRecord do
     expect(FixedRecord::VERSION).not_to be nil
   end
 
+  it "has a filename method" do
+    expect(HappyPathArray.filename).to end_with "happy_path_array.yml"
+    expect(FixedRecord).not_to respond_to :filename
+  end
+
+
+
+
   it "raises an Errno::ENOENT exception if the data file is missing" do
     expect {
       MissingData.all
@@ -130,6 +138,15 @@ RSpec.describe FixedRecord do
       it "returns the correct count" do
         expect(HappyPathArray.count).to be 2
       end
+
+      it "returns the correct length" do
+        expect(HappyPathArray.length).to be 2
+      end
+
+      it "returns the correct size" do
+        expect(HappyPathArray.size).to be 2
+      end
+
 
       it "implements each" do
         expect(HappyPathArray).to respond_to :each

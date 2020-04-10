@@ -3,8 +3,9 @@ require 'yaml'
 require 'psych'
 require 'set'
 
+# Provides error-checked simplified access to a YAML data file
 class FixedRecord
-  VERSION = "0.5.0"
+  VERSION = "0.6.0"
 
   # Lazy load data from given filename 
   # creating accessors for top level attributes
@@ -13,51 +14,118 @@ class FixedRecord
     optional = optional.map( &:to_s )
     throw ArgumentError, "Required and Optional names overlap" unless (required & optional).empty?
 
-    valid_keys = Set.new( required )
-    valid_keys.merge( optional )
-    required_keys = Set.new( required )
+    # Although not necessary, the class_eval makes it easier to see 
+    # we are defining variables and methods in the context of the child class which
+    # called us
+    class_eval do
+      # Use @x names for class variables to simplify access
+      @filename = filename
+      @valid_keys = Set.new( required )
+      @valid_keys.merge( optional )
+      @required_keys = Set.new( required )
+      @singleton = singleton
 
-    self.class_variable_set( :@@filename, filename )
-    self.class_variable_set( :@@required_keys, required_keys )
-    self.class_variable_set( :@@valid_keys, valid_keys )
-    self.class_variable_set( :@@items, nil )
-    self.class_variable_set( :@@singleton, singleton )
+      # Load the data and create the methods...
+      def self.load!
+        return unless @items.nil?
+        begin
+          y = YAML.load_file( @filename )
+        rescue Errno::ENOENT
+          raise 
+        rescue Psych::SyntaxError => error
+          fname = File.basename(@filename)
+          msg = error.message
+          if msg.include? @filename
+            msg.sub!( @filename, fname )
+            msg = "#{error.class.name} #{msg}"
+          else
+            msg = "#{error.class.name} #{fname} #{error.message}"
+          end
+          raise ArgumentError, msg
+        end
+
+        validate_structure( y, @singleton, @filename )
+
+        if @valid_keys.empty? 
+          # Grab keys from file
+          if @singleton
+            @valid_keys = y.keys
+          elsif y.is_a?(Array)
+            @valid_keys = y.first.keys
+            @required_keys = @valid_keys       
+          elsif y.is_a?(Hash)
+            @valid_keys = y[y.keys.first].keys
+            @required_keys = @valid_keys
+          end
+        end
+
+        if @singleton
+          @items = y
+        elsif y.is_a?(Array)
+          @items = y.map.with_index do |values,i|
+            validate_item( @valid_keys, @required_keys, values, i )
+            r = new
+            r.instance_variable_set( :@values, values )
+            r
+          end
+        elsif y.is_a?(Hash)
+          @items = Hash.new
+          add_key = !@valid_keys.member?('key')
+          y.each do |k,values|
+            validate_item( @valid_keys, @required_keys, values, k )
+            values['key'] = k if add_key
+            r = new
+            r.instance_variable_set( :@values, values )
+            @items[k] = r   
+          end
+          define_method( :key ) { @values['key'] }  if add_key
+        end
+        create_methods( @valid_keys  )
+      end
+
+      # filename data was loaded from
+      def self.filename
+        @filename
+      end
+
+      # valid keys (as strings)
+      def self.valid_names
+        load!
+        @valid_keys
+      end
+    end #class_eval
 
     if singleton 
-      class_eval %Q{
+      class_eval do # class methods for singleton object
         def self.[](k)
           load!
           k = k.to_s
-          raise ArgumentError, "\#{k} is not a valid key" unless @@valid_keys.member?(k)
-          @@items[k]
+          raise ArgumentError, "#{k} is not a valid key" unless @valid_keys.member?(k)
+          @items[k]
         end
-      }
+      end # class_eval
     else
-      class_eval %Q{
-        class << self
-          include Enumerable
-        end
-
-        def self.all 
+      # Add methods for Coillection based objects
+      self.class.include Enumerable
+      class_eval do
+        def self.all
           load!
-          @@items
+          @items
         end
 
         def self.each( &block )
-          load!
-          @@items.each(&block)
+          all.each(&block)
         end
 
-        def self.count
-          load!
-          @@items.length
+        def self.size
+          all.size
         end
 
         def self.[]( k )
           if all.is_a?(Hash)
             all[k.to_s]
           else
-            nil
+            nil # Arguably we could index the array, but if we did your code would smell...
           end
         end
 
@@ -68,76 +136,16 @@ class FixedRecord
             false
           end
         end 
+      end #class_eval
+    
+      # Only way I can find to alias class methods...
+      class << self
+        alias length size
+        alias count size
+      end
 
-      }
     end
 
-    class_eval %Q{
-      def self.filename
-        @@filename
-      end
-
-      def self.valid_names
-        load!
-        @@valid_keys
-      end
-
-      def self.load!
-        if @@items.nil?
-          begin
-            y = YAML.load_file( @@filename )
-          rescue Errno::ENOENT
-            raise 
-          rescue Psych::SyntaxError => error
-            fname = File.basename(@@filename)
-            msg = error.message
-            if msg.include? @@filename
-              msg.sub!( @@filename, fname )
-              msg = "\#{error.class.name} \#{msg}"
-            else
-              msg = "\#{error.class.name} \#{fname} \#{error.message}"
-            end
-            raise ArgumentError, msg
-          end
-          validate_structure( y, @@singleton, @@filename )
-          if @@valid_keys.empty? 
-            # Grab keys from file
-            if @@singleton
-              @@valid_keys = y.keys
-            elsif y.is_a?(Array)
-              @@valid_keys = y.first.keys
-              @@required_keys = @@valid_keys       
-            elsif y.is_a?(Hash)
-              @@valid_keys = y[y.keys.first].keys
-              @@required_keys = @@valid_keys
-            end
-          end
-
-          if @@singleton
-            @@items = y
-          elsif y.is_a?(Array)
-            @@items = y.map.with_index do |values,i|
-              validate_item( @@valid_keys, @@required_keys, values, i )
-              r = new
-              r.instance_variable_set( :@values, values )
-              r
-            end
-          elsif y.is_a?(Hash)
-            @@items = Hash.new
-            add_key = !@@valid_keys.member?('key')
-            y.each do |k,values|
-              validate_item( @@valid_keys, @@required_keys, values, k )
-              values['key'] = k if add_key
-              r = new
-              r.instance_variable_set( :@values, values )
-              @@items[k] = r   
-            end
-            define_method( :key ) { @values['key'] }  if add_key
-          end
-          create_methods( @@valid_keys  )
-        end
-      end
-    }
   end
 
 
@@ -155,11 +163,7 @@ private
       define_method( key.to_sym) { @values[key] }
     end
     # Test if a value is defined (could be nil) for a name
-    class_eval %Q{
-        def present?(name)
-          @values.key?( name.to_s )
-        end
-      }
+    define_method( :present? ) { |name| @values.key?(name.to_s)}
   end
 
 
@@ -204,7 +208,5 @@ private
     # User can implement this to add extra validation
     validate( values, index )
   end
-
-
 
 end

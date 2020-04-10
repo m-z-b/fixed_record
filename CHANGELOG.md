@@ -1,5 +1,9 @@
 # Gem fixed_record Changelog
 
+## 0.6.0
+* Internal refactoring - after reading _Metaprogramming Ruby_!
+* Added size and length methods
+
 ## 0.5.0
 * Added class method `valid_names` to return valid names in records
 * Documented class method `filename`
