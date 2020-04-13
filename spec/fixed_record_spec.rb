@@ -93,8 +93,28 @@ end
 
 
 RSpec.describe FixedRecord do
-  it "has a version number" do
-    expect(FixedRecord::VERSION).not_to be nil
+  context "class" do
+    it "has a version number" do
+      expect(FixedRecord::VERSION).not_to be nil
+    end
+
+    it "has a data method" do
+      expect(FixedRecord).to respond_to :data
+    end
+
+    it "does not get methods inserted by a child class" do
+      HappyPathArray.load!
+      [ :each, :load!, :all, :[] ].each do |method|
+        expect(HappyPathArray).to respond_to method
+        expect(FixedRecord).not_to respond_to method
+      end
+    end
+
+    it "does not accidentally include Enumerable in the class Class" do
+      HappyPathArray.load!
+      expect(Class).not_to respond_to :first
+    end
+
   end
 
   it "has a filename method" do

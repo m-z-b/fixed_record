@@ -1,5 +1,10 @@
 # Gem fixed_record Changelog
 
+## 0.6.1
+* Fixed bug which resulted in the module Enumerable being included
+  in class _Class_, resulting in very confusing errors when using
+  RSpec feature specifications in programs using the gem.
+
 ## 0.6.0
 * Internal refactoring - after reading _Metaprogramming Ruby_!
 * Added size and length methods

@@ -5,7 +5,7 @@ require 'set'
 
 # Provides error-checked simplified access to a YAML data file
 class FixedRecord
-  VERSION = "0.6.0"
+  VERSION = "0.6.1"
 
   # Lazy load data from given filename 
   # creating accessors for top level attributes
@@ -18,7 +18,7 @@ class FixedRecord
     # we are defining variables and methods in the context of the child class which
     # called us
     class_eval do
-      # Use @x names for class variables to simplify access
+      # Use @x names for class variables to simplify / restrict access
       @filename = filename
       @valid_keys = Set.new( required )
       @valid_keys.merge( optional )
@@ -93,7 +93,7 @@ class FixedRecord
         load!
         @valid_keys
       end
-    end #class_eval
+    end # class_eval
 
     if singleton 
       class_eval do # class methods for singleton object
@@ -106,7 +106,9 @@ class FixedRecord
       end # class_eval
     else
       # Add methods for Coillection based objects
-      self.class.include Enumerable
+      class << self
+        include Enumerable
+      end
       class_eval do
         def self.all
           load!
